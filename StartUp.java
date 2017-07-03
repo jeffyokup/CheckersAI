@@ -1,3 +1,4 @@
+import java.util.ArrayList;
 import java.util.Scanner;
 
 public class StartUp {
@@ -16,40 +17,58 @@ public class StartUp {
 		evilAISetup(brd);
 		boolean end = false;
 		while(true){
-			//RED MOVE
-			end = redMovee();
-			System.out.println();
-			if(end)
-				break;
-			Thread.sleep(1000);
 			//Black Move
 			end = blackMovee();
 			System.out.println();
 			if(end)
 				break;
+			brd.kingMe();
+			Thread.sleep(1000);
+
+			//RED MOVE
+			end = redMovee();
+			System.out.println();
+			if(end)
+				break;
+			brd.kingMe();
 			Thread.sleep(1000);
 		}
 	}
 	
 	private static boolean redMovee(){
-		
-		boolean forceJump = forceJumpRed();
-		if(!forceJump){
-			System.out.println("Red Move");
-			String redMove = ""; 
-			if(evilAI.color == 'r')
-				redMove = evilAI.getSuperiorMove();
+		//Black Move
+		ArrayList<String> goodMoves = forceJumpRed();
+		String redMove = ""; boolean good = false;
+		while(!good){
+			System.out.println("Red  Move");
+			redMove = "";
+			if(evilAI.color == 'r'){
+				redMove = evilAI.getSuperiorMove(goodMoves);
+				System.out.println(redMove + " : AI Move");
+			}
 			else
 				redMove = scan.nextLine();
-			boolean goodMove = brd.movePiece(redMove.substring(0,2), redMove.substring(2,redMove.length()));
-			while(!goodMove){
-				System.out.println("Red Enter Move");
-				 redMove = scan.nextLine();
-				 goodMove = brd.movePiece(redMove.substring(0,2), redMove.substring(2,redMove.length()));
+
+			if(goodMoves.size() == 0)
+				break;
+
+			String converted = brd.convert(redMove.substring(0,2)) + brd.convert(redMove.substring(2,4));
+			for(int i = 0; i < goodMoves.size();i++ ){
+				if(converted.equals(goodMoves.get(i).substring(0,4))){
+					good = true;
+					break;
+				}
 			}
 		}
-		
-		//PRINT BOARD
+
+		boolean goodMove = brd.movePiece(redMove.substring(0,2), redMove.substring(2,redMove.length()));
+		while(!goodMove){
+			System.out.println("Red Enter Move");
+			redMove = scan.nextLine();
+			goodMove = brd.movePiece(redMove.substring(0,2), redMove.substring(2,redMove.length()));
+		}
+
+		//Print Board
 		brd.printBoard();
 
 		//Check Victory
@@ -61,21 +80,35 @@ public class StartUp {
 	
 	private static boolean blackMovee(){
 		//Black Move
-		boolean forceJump = forceJumpBlack();
-		if(!forceJump){
+		ArrayList<String> goodMoves = forceJumpBlack();
+		String blackMove = ""; boolean good = false;
+		while(!good){
 			System.out.println("Black  Move");
-			String blackMove = ""; 
-			if(evilAI.color == 'b')
-				blackMove = evilAI.getSuperiorMove();
+			blackMove = "";
+			if(evilAI.color == 'b'){
+				blackMove = evilAI.getSuperiorMove(goodMoves);
+				System.out.println(blackMove + " : AI Move");
+			}
 			else
 				blackMove = scan.nextLine();
-			boolean goodMove = brd.movePiece(blackMove.substring(0,2), blackMove.substring(2,blackMove.length()));
+			if(goodMoves.size() == 0)
+				break;
+			String converted = brd.convert(blackMove.substring(0,2)) + brd.convert(blackMove.substring(2,4));
+			for(int i = 0; i < goodMoves.size();i++ ){
+				if(converted.equals(goodMoves.get(i).substring(0,4))){
+					good = true;
+					break;
+				}
+			}
+		}
+
+			boolean goodMove = brd.movePiece(blackMove.substring(0,2), blackMove.substring(2));
 			while(!goodMove){
 				System.out.println("Black Enter Move");
 				 blackMove = scan.nextLine();
 				 goodMove = brd.movePiece(blackMove.substring(0,2), blackMove.substring(2,blackMove.length()));
 			}
-		}
+
 		//Print Board
 		brd.printBoard();
 
@@ -86,25 +119,24 @@ public class StartUp {
 		return false;
 	}
 
-	private static boolean forceJumpRed(){
-		for(int row = 0; row < 7; row++){
-			for(int col = 0; col < 7; col++){
+	public static ArrayList<String> forceJumpRed(){
+		ArrayList<String> validMoves = new ArrayList<String>();
+		for(int row = 0; row < 8; row++){
+			for(int col = 0; col < 8; col++){
 				if(brd.checkerBoard[row][col] != null && brd.checkerBoard[row][col].team() == 'r'){// If red is found
 					try {
 						if (brd.checkerBoard[row - 1][col + 1] != null && brd.checkerBoard[row - 1][col + 1].team() != 'r') {//up right
 							if (brd.checkerBoard[row - 2][col + 2] == null) {
-								brd.movePiece(row + "" + col, (row - 2) + "" + (col + 2));
-								return true;
+								validMoves.add(row+""+col+""+(row-2)+""+(col+2));
 							}
 						}
 					}
 					catch(Exception e){}
 
 					try {
-						if(brd.checkerBoard[row-1][col-1] != null && brd.checkerBoard[row-1][col+1].team() != 'r'){ //up left
+						if(brd.checkerBoard[row-1][col-1] != null && brd.checkerBoard[row-1][col-1].team() != 'r'){ //up left
 							if(brd.checkerBoard[row-2][col-2] == null){
-								brd.movePiece(row +""+ col, (row-2) + "" +(col - 2));
-								return true;
+								validMoves.add(row+""+col+""+(row-2)+""+(col-2));
 							}
 						}
 					}
@@ -112,18 +144,18 @@ public class StartUp {
 					}
 				}
 			}
-		return false;
+		return validMoves;
 		}
 	
-	private static boolean forceJumpBlack(){
-		for(int row = 0; row < 7; row++){
-			for(int col = 0; col < 7; col++){
+	public static ArrayList<String> forceJumpBlack(){
+		ArrayList<String> validMoves = new ArrayList<String>();
+		for(int row = 0; row < 8; row++){
+			for(int col = 0; col < 8; col++){
 				if(brd.checkerBoard[row][col] != null && brd.checkerBoard[row][col].team() == 'b'){// If red is found
 					try{
 						if(brd.checkerBoard[row+1][col+1] != null && brd.checkerBoard[row+1][col+1].team() != 'b'){//bottom right
 							if(brd.checkerBoard[row+2][col+2] == null){
-								brd.movePiece(row +""+ col, (row+2) + "" +(col + 2));
-								return true;
+								validMoves.add(row+""+col+""+(row+2)+""+(col+2));
 							}
 						}
 					}
@@ -131,8 +163,7 @@ public class StartUp {
 					try{
 						if(brd.checkerBoard[row+1][col-1] != null && brd.checkerBoard[row+1][col-1].team() != 'b'){ //bottom left
 							if(brd.checkerBoard[row+2][col-2] == null){
-								brd.movePiece(row +""+ col, (row+2) + "" +(col - 2));
-								return true;
+								validMoves.add(row+""+col+""+(row+2)+""+(col-2));
 							}
 						}
 					}
@@ -141,7 +172,7 @@ public class StartUp {
 				}
 			}
 		}
-		return false;
+		return validMoves;
 	}
 	
 	private static void evilAISetup(Board brd){

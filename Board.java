@@ -1,17 +1,17 @@
 public class Board {
 
 	public Piece[][] checkerBoard = new Piece[8][8];
-	char turn = 'r';
+	char turn = 'b';
 
 	public Board(){
 		for(int row = 0; row < 3; row++){
 			for(int col = 0; col < 8; col++){
 				if(row % 2 == 0){
-					if(col % 2 == 0)
+					if(col % 2 != 0)
 						checkerBoard[row][col] = new Piece('b', false, row, col);
 				}
 				else{
-					if(col % 2 != 0)
+					if(col % 2 == 0)
 						checkerBoard[row][col] = new Piece('b', false, row, col);
 				}
 			}
@@ -20,11 +20,11 @@ public class Board {
 		for(int row = 5; row < 8; row++){
 			for(int col = 0; col < 8; col++){
 				if(row % 2 == 0){
-					if(col % 2 == 0)
+					if(col % 2 != 0)
 						checkerBoard[row][col] = new Piece('r', false, row, col);
 				}
 				else{
-					if(col % 2 != 0)
+					if(col % 2 == 0)
 						checkerBoard[row][col] = new Piece('r', false, row, col);
 				}
 			}
@@ -41,10 +41,6 @@ public class Board {
 	
 	/**
 	 * Attempts to move a piece
-	 * @param rowStart
-	 * @param colStart
-	 * @param rowEnd
-	 * @param colEnd
 	 * @return True if move was successful, false if move unsuccessful
 	 */
 	public boolean movePiece(String start, String moves){
@@ -94,7 +90,7 @@ public class Board {
 		else
 			turn = 'b';
 	}
-	
+
 	private boolean regularMove(int rowStart,int colStart, int rowEnd, int colEnd, Piece piece){
 		boolean isKing = piece.isKing();
 		if(isKing){ //move for King
@@ -178,8 +174,9 @@ public class Board {
 	 * @param colEnd
 	 * @return
 	 */
-	private boolean fairRedMove(int rowStart, int colStart, int rowEnd, int colEnd){
+	public boolean fairRedMove(int rowStart, int colStart, int rowEnd, int colEnd){
 		if((rowEnd == rowStart - 1) && ((colEnd == colStart + 1) || (colEnd == colStart - 1)))
+			if(checkerBoard[rowEnd][colEnd] == null)
 			return true;
 		return false;
 	}
@@ -192,8 +189,9 @@ public class Board {
 	 * @param colEnd
 	 * @return
 	 */
-	private boolean fairBlackMove(int rowStart, int colStart, int rowEnd, int colEnd){
+	public boolean fairBlackMove(int rowStart, int colStart, int rowEnd, int colEnd){
 		if((rowEnd == rowStart + 1) && ((colEnd == colStart + 1) || (colEnd == colStart - 1)))
+			if(checkerBoard[rowEnd][colEnd] == null)
 			return true;
 		return false;
 	}
@@ -294,9 +292,39 @@ public class Board {
 
 	}
 
-	//TODO FINISH THIS~!
+
+	/**
+	 *
+	 * @param rowStart
+	 * @param colStart
+	 * @param rowEnd
+	 * @param colEnd
+	 * @param piece being movied
+	 * @return
+	 */
 	private boolean fairKingKill(int rowStart, int colStart, int rowEnd, int colEnd, Piece piece){
-		return true;
+		char color = piece.team();
+		if(rowEnd < rowStart){ // Moving up
+			if(colEnd > colStart){//moving right
+				if(checkerBoard[rowEnd+1][colEnd-1].team() != color)
+					return true;
+			}
+			else{//moving left
+				if(checkerBoard[rowEnd+1][colEnd+1].team() != color)
+					return true;
+			}
+		}
+		else{ //moving down
+			if(colEnd > colStart){//moving right
+				if(checkerBoard[rowEnd-1][colEnd-1].team() != color)
+					return true;
+			}
+			else{//moving left
+				if(checkerBoard[rowEnd-1][colEnd+1].team() != color)
+					return true;
+			}
+		}
+		return false;
 	}
 	
 	/**
@@ -304,7 +332,7 @@ public class Board {
 	 * @param cord
 	 * @return
 	 */
-	private String convert(String cord){
+	public String convert(String cord){
 		String firstLetter = cord.charAt(0) + "";
 		String num = "";
 		switch(firstLetter){
@@ -344,13 +372,30 @@ public class Board {
 					System.out.print("  ");
 				}
 				else if(checkerBoard[row][col].team() == 'r'){
-					System.out.print("R ");
+					if(checkerBoard[row][col].isKing())
+						System.out.print("R ");
+					else
+					System.out.print("r ");
 				}
 				else{
-					System.out.print("B ");
+					if(checkerBoard[row][col].isKing())
+						System.out.print("B ");
+					else
+						System.out.print("b ");
 				}
 			}
 			System.out.println();
+		}
+	}
+
+	public void kingMe(){
+		for(int i = 0; i < 8; i++){
+			if(checkerBoard[0][i] != null && checkerBoard[0][i].team() == 'r')
+				checkerBoard[0][i].kingIt();
+		}
+		for(int i = 0; i < 8; i++){
+			if(checkerBoard[7][i] != null && checkerBoard[7][i].team() == 'b')
+				checkerBoard[7][i].kingIt();
 		}
 	}
 }

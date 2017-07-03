@@ -27,6 +27,10 @@ public class Piece {
 	public char team(){
 		return team;
 	}
+
+	public void kingIt(){
+		king = true;
+	}
 	
 	public Piece clone(){
 		Piece temp = new Piece(team,king,row,col);
