@@ -16,7 +16,7 @@ public class Victory {
 	}
 	
 	/**
-	 * 0 is R, 1 is black
+	 * 0 is R, 1 is B
 	 * @return
 	 */
 	public int[] colorCount(){

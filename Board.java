@@ -1,7 +1,7 @@
 public class Board {
 
 	public Piece[][] checkerBoard = new Piece[8][8];
-	char turn = 'b';
+	public char turn = 'b';
 
 	public Board(){
 		for(int row = 0; row < 3; row++){
@@ -48,8 +48,7 @@ public class Board {
 		int rowStart = Integer.parseInt(realStart.charAt(0) + "");
 		int colStart = Integer.parseInt(realStart.charAt(1) + "");
 		Piece piece = checkerBoard[rowStart][colStart].clone(); //Piece being moved
-		
-	
+
 		for(int i = 0; i < moves.length(); i += 2){ // go through each coordinate
 			String tempMove = convert(moves.substring(i, i + 2));
 			int rowEnd = Integer.parseInt(tempMove.charAt(0) + "");
@@ -80,11 +79,10 @@ public class Board {
 			rowStart = rowEnd;
 			colStart = colEnd;
 		}
-		changeTurn();
 		return true;
 	}
 	
-	private void changeTurn(){
+	public void changeTurn(){
 		if(turn == 'b')
 			turn = 'r';
 		else
@@ -148,15 +146,17 @@ public class Board {
 			return false;
 		}
 		
-		if(piece.team() != turn || pieceAtCord(rowEnd,colEnd)){ //checks team and whether there is a piece at the coordinates
+		if(piece.team() != turn){ //checks team and whether there is a piece at the coordinates
 			System.out.println("Not on your team");
 			return false;
+		}
+		if(pieceAtCord(rowEnd,colEnd)){
+			System.out.println("Piece at end Coordinates");
 		}
 		if(rowEnd > 7 || rowEnd < 0 || colEnd > 7 || colEnd < 0){
 			System.out.println("Out of Bounds");
 			return false;
 		}
-		
 		return true;
 	}
 	
@@ -206,9 +206,11 @@ public class Board {
 	 */
 	private boolean fairKingMove(int rowStart, int colStart, int rowEnd, int colEnd){
 		if((rowEnd == rowStart + 1) && ((colEnd == colStart + 1) || (colEnd == colStart - 1)))
-			return true;
-		else if((rowEnd == rowStart - 1) && ((colEnd == colStart + 1) || (colEnd == colStart - 1)))
-			return true;
+			if(checkerBoard[rowEnd][colEnd] == null)
+				return true;
+		 if((rowEnd == rowStart - 1) && ((colEnd == colStart + 1) || (colEnd == colStart - 1)))
+				if(checkerBoard[rowEnd][colEnd] == null)
+					return true;
 		return false;
 	}
 	
@@ -306,22 +308,34 @@ public class Board {
 		char color = piece.team();
 		if(rowEnd < rowStart){ // Moving up
 			if(colEnd > colStart){//moving right
-				if(checkerBoard[rowEnd+1][colEnd-1].team() != color)
+				if(checkerBoard[rowEnd+1][colEnd-1].team() != color){
+					checkerBoard[rowEnd+1][colEnd-1] = null;
+					System.out.println("Killed Piece at" + (rowEnd + 1) + " " + (colEnd - 1));
 					return true;
+				}
 			}
 			else{//moving left
-				if(checkerBoard[rowEnd+1][colEnd+1].team() != color)
+				if(checkerBoard[rowEnd+1][colEnd+1].team() != color){
+					checkerBoard[rowEnd+1][colEnd+1] = null;
+					System.out.println("Killed Piece at" + (rowEnd + 1) + " " + (colEnd + 1));
 					return true;
+				}
 			}
 		}
 		else{ //moving down
 			if(colEnd > colStart){//moving right
-				if(checkerBoard[rowEnd-1][colEnd-1].team() != color)
+				if(checkerBoard[rowEnd-1][colEnd-1].team() != color) {
+					checkerBoard[rowEnd - 1][colEnd - 1] = null;
+					System.out.println("Killed Piece at" + (rowEnd - 1) + " " + (colEnd - 1));
 					return true;
+				}
 			}
 			else{//moving left
-				if(checkerBoard[rowEnd-1][colEnd+1].team() != color)
+				if(checkerBoard[rowEnd-1][colEnd+1].team() != color){
+					checkerBoard[rowEnd-1][colEnd+1] = null;
+					System.out.println("Killed Piece at" + (rowEnd - 1) + " " + (colEnd + 1));
 					return true;
+				}
 			}
 		}
 		return false;
